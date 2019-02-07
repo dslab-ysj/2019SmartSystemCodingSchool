@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+environment/project/com.samsung.artik.cc.target.elf.debug.1623004057/ARTIK_PRE_CONFIGURATION/delimiter=;
+environment/project/com.samsung.artik.cc.target.elf.debug.1623004057/ARTIK_PRE_CONFIGURATION/operation=replace
+environment/project/com.samsung.artik.cc.target.elf.debug.1623004057/ARTIK_PRE_CONFIGURATION/value=extra
+environment/project/com.samsung.artik.cc.target.elf.debug.1623004057/append=true
+environment/project/com.samsung.artik.cc.target.elf.debug.1623004057/appendContributed=true
+environment/project/com.samsung.artik.cc.target.elf.release.1155393854/ARTIK_PRE_CONFIGURATION/delimiter=;
+environment/project/com.samsung.artik.cc.target.elf.release.1155393854/ARTIK_PRE_CONFIGURATION/operation=replace
+environment/project/com.samsung.artik.cc.target.elf.release.1155393854/ARTIK_PRE_CONFIGURATION/value=extra
+environment/project/com.samsung.artik.cc.target.elf.release.1155393854/append=true
+environment/project/com.samsung.artik.cc.target.elf.release.1155393854/appendContributed=true
