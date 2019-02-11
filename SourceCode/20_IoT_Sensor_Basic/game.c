@@ -178,6 +178,7 @@ int inst2_main(int argc, FAR char *argv[])
 	int TONE = 0;
 	int Duty_Cycle = 100;
 	int TONE_var = 0;
+	int count;
 
 	low_tone_sw  = PIN_D2; // GPIO 0 PORT
 	high_tone_sw = PIN_D4;
@@ -188,6 +189,8 @@ int inst2_main(int argc, FAR char *argv[])
 
 	while(1)
 	{
+		count = 0;
+
 		val_ir = read_adc(pin_ir);
 
 		if(gpio_read(high_tone_sw)) {
@@ -214,7 +217,14 @@ int inst2_main(int argc, FAR char *argv[])
 		    	  TONE = G6;
 		}
 
-		if(gpio_read(low_tone_sw) || gpio_read(high_tone_sw)){
+		while(gpio_read(low_tone_sw) && gpio_read(high_tone_sw)){
+			count++;
+			up_mdelay(1);
+			if(count == 3000)
+				goto B;
+		}
+
+		if(gpio_read(low_tone_sw)){
 
 			fd_buzzer = pwm_open(pin_buzzer);
 
@@ -222,22 +232,11 @@ int inst2_main(int argc, FAR char *argv[])
 
 			TONE_var = TONE;
 
-			while(TONE==TONE_var && (gpio_read(low_tone_sw) || gpio_read(high_tone_sw))){
+			while(TONE==TONE_var && gpio_read(low_tone_sw) && gpio_read(high_tone_sw) == 0){
 
 				val_ir = read_adc(pin_ir);
 
-				if(gpio_read(high_tone_sw)) {
-					  if(val_ir>550)
-						  TONE_var = E7;
-					  else if(val_ir>250)
-						  TONE_var = D7;
-					  else if(val_ir>140)
-						  TONE_var = C7;
-					  else if(val_ir>105)
-						  TONE_var = B6;
-					  else
-						  TONE_var = A6;
-				} else {
+
 					  if(val_ir>550)
 						  TONE_var = C6;
 					  else if(val_ir>250)
@@ -248,14 +247,41 @@ int inst2_main(int argc, FAR char *argv[])
 						  TONE_var = F6;
 					  else
 						  TONE_var = G6;
-				}
 			}
 				pwm_close(fd_buzzer);
-			}
+		} else if(gpio_read(high_tone_sw)){
 
-			else
+			fd_buzzer = pwm_open(pin_buzzer);
+
+			pwm_write(fd_buzzer,TONE,100);
+
+			TONE_var = TONE;
+
+			while(TONE==TONE_var && gpio_read(high_tone_sw) && gpio_read(low_tone_sw) == 0){
+
+				val_ir = read_adc(pin_ir);
+
+					  if(val_ir>550)
+						  TONE_var = E7;
+					  else if(val_ir>250)
+						  TONE_var = D7;
+					  else if(val_ir>140)
+						  TONE_var = C7;
+					  else if(val_ir>105)
+						  TONE_var = B6;
+					  else
+						  TONE_var = A6;
+
+			}
+				pwm_close(fd_buzzer);
+		} else
 			while(gpio_read(low_tone_sw) == 0 && gpio_read(high_tone_sw) == 0);
 	}
+
+	B:
+
+	printf("Exit Program.\n");
+
 	return 0;
 }
 
@@ -270,32 +296,33 @@ int inst3_main(int argc, FAR char *argv[]){
 	int sound_low = 0;
 	int sound_high = 0;
 	int fd_buzzer = 0;
+	int count;
 
 	pin_buzzer = PWM0;
 	SW_low_tone = PIN_D2;
-	SW_high_tone = PIN_D7;
-	SW_exit1 = PIN_D4;
-	SW_exit2 = PIN_D8;
+	SW_high_tone = PIN_D4;
 
 	if(atoi(argv[2]) == 1){
 		sound_low = C6;
-		sound_high = D6;
-		printf("C,D\n");
+		sound_high = G6;
+		printf("C,Gn");
 	} else if(atoi(argv[2]) == 2){
-		sound_low = E6;
-		sound_high = F6;
-		printf("E,F\n");
-	} else if(atoi(argv[2]) == 3){
-		sound_low = G6;
+		sound_low = D6;
 		sound_high = A6;
-		printf("G,A\n");
+		printf("D,A\n");
+	} else if(atoi(argv[2]) == 3){
+		sound_low = E6;
+		sound_high = B6;
+		printf("E,B\n");
 	} else {
-		sound_low = B6;
+		sound_low = F6;
 		sound_high = C7;
-		printf("B,C\n");
+		printf("F,C\n");
 	}
 
-	while(gpio_read(SW_exit1) == 0 || gpio_read(SW_exit2) == 0){
+	while(1){
+
+		count = 0;
 
 		if(gpio_read(SW_low_tone)){
 
@@ -304,7 +331,7 @@ int inst3_main(int argc, FAR char *argv[]){
 			pwm_write(fd_buzzer,sound_low,100);
 			printf("%d\n",sound_low);
 
-			while(gpio_read(SW_low_tone) || (gpio_read(SW_low_tone) && gpio_read(SW_high_tone)));
+			while(gpio_read(SW_low_tone) && gpio_read(SW_high_tone) == 0);
 		} else if(gpio_read(SW_high_tone)){
 
 			fd_buzzer = pwm_open(pin_buzzer);
@@ -312,12 +339,26 @@ int inst3_main(int argc, FAR char *argv[]){
 			pwm_write(fd_buzzer,sound_high,100);
 			printf("%d\n",sound_high);
 
-			while(gpio_read(SW_high_tone) || (gpio_read(SW_low_tone) && gpio_read(SW_high_tone)));
+			while(gpio_read(SW_high_tone) && gpio_read(SW_low_tone) == 0);
 		}
 
 		pwm_close(fd_buzzer);
 
+		while(gpio_read(46) && gpio_read(47)){
+			count++;
+			up_mdelay(1);
+			if(count == 3000){
+				goto A;
+			}
+		}
+
 	}
+
+	A:
+
+	printf("Exit Program.\n");
+
+	return 0;
 
 }
 
